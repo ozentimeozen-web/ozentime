@@ -1,0 +1,50 @@
+{
+  "server": {
+    "manifest": {
+      "version": "1.2",
+      "last_update": "2026-06-28T12:00:00Z",
+      "rules_count": 128,
+      "checksum": "sha256-abcdef1234567890"
+    },
+    "definitions": [
+      {
+        "id": "DEF-20260628-001",
+        "encrypted_payload": "base64-ENCODED-RULES",
+        "expiry": "2026-07-01T00:00:00Z",
+        "signature": "RSA-SIGNATURE"
+      }
+    ],
+    "reports": [
+      {
+        "client_id": "AV-CLIENT-123",
+        "infection": "Trojan.Generic",
+        "timestamp": "2026-06-28T12:30:00Z",
+        "encrypted_feedback": "base64-ENCODED-FEEDBACK"
+      }
+    ],
+    "admin": {
+      "hidden_entry": "dot-top-right",
+      "connection_codes": [
+        {
+          "code": "81649273",
+          "rules": "must contain digit 1 and 6",
+          "rotation": "every_3_logins"
+        }
+      ],
+      "gmail_fallback": "enabled"
+    },
+    "cleanup": {
+      "policy": "delete_definitions_after_3_days",
+      "automation": "GitHub_Actions"
+    },
+    "ai_gatekeeper": {
+      "role": "decoder_and_enforcer",
+      "tasks": [
+        "decrypt_rules",
+        "validate_signature",
+        "apply_to_engine",
+        "discard_expired"
+      ]
+    }
+  }
+}
