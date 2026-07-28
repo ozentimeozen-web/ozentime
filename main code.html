@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ozentime Connect</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <!-- Prism.js for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: linear-gradient(135deg, #e6f7ff, #dbe6ff, #f9e6ff);
+      color: #333;
+      line-height: 1.6;
+      position: relative;
+    }
+    .accent-left, .accent-right { position:absolute; top:0; width:400px; height:100%; z-index:-1; }
+    .accent-left { left:0; background:radial-gradient(circle at 30% 50%, #00aaff, #8844ff); clip-path:circle(60% at 0% 50%); }
+    .accent-right { right:0; background:radial-gradient(circle at 70% 50%, #8844ff, #ff66cc); clip-path:circle(60% at 100% 50%); }
+    .hero-circle { width:160px; height:160px; border-radius:50%; border:10px solid #00aaff; margin:30px auto; background:radial-gradient(circle,#e6f7ff 40%,transparent 70%); box-shadow:0 0 25px rgba(0,170,255,0.6); }
+    header { background:linear-gradient(135deg,#000,#004466); color:#fff; padding:30px 20px; text-align:center; border-bottom:4px solid #00aaff; }
+    nav { background:rgba(0,51,102,0.9); padding:12px; text-align:center; backdrop-filter:blur(6px); position:sticky; top:0; }
+    nav a { color:#fff; text-decoration:none; font-weight:bold; margin:0 15px; transition:color 0.3s ease; }
+    nav a:hover { color:#00aaff; }
+    section { padding:30px; margin:30px auto; max-width:900px; background:rgba(255,255,255,0.75); border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,0.15); backdrop-filter:blur(12px); }
+    #chat-box { border:1px solid #ccc; border-radius:8px; padding:15px; height:300px; overflow-y:auto; background:#fdfdfd; }
+    .message { margin-bottom:12px; padding:8px; border-radius:6px; background:#eef6ff; }
+    .timestamp { font-size:0.8em; color:#666; margin-top:4px; }
+    .admin { color:#ff4444; font-weight:bold; }
+    #chat-input { width:70%; padding:10px; margin-top:10px; border-radius:6px; border:1px solid #ccc; }
+    #send-btn { padding:10px 15px; margin-left:10px; border:none; border-radius:6px; background:#00aaff; color:#fff; font-weight:bold; cursor:pointer; }
+    #send-btn:hover { background:#0077cc; }
+  </style>
+</head>
+<body>
+  <div class="accent-left"></div>
+  <div class="accent-right"></div>
+  <div class="hero-circle"></div>
+
+  <header>
+    <h1>Ozentime Connect</h1>
+    <p>Collaborate • Share Code • Chat</p>
+  </header>
+
+  <nav>
+    <a href="index.html">Main Site</a>
+    <a href="connect.html">Connect</a>
+    <a href="about.html">About</a>
+  </nav>
+
+  <section>
+    <h2>Login</h2>
+    <p>Sign in with your Gmail to start collaborating.</p>
+    <button id="login-btn">Login with Gmail</button>
+    <input type="password" id="admin-pass" placeholder="Enter admin password">
+    <div id="user-info"></div>
+  </section>
+
+  <section>
+    <h2>Groups</h2>
+    <select id="group-select"><option value="general">General</option></select>
+    <button id="create-group-btn">Create Group</button>
+  </section>
+
+  <section>
+    <h2>Chat Room</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="chat-input" placeholder="Type a message...">
+    <button id="send-btn">Send</button>
+  </section>
+
+  <script>
+    // Firebase config (replace with your actual keys)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const loginBtn = document.getElementById('login-btn');
+    const adminPass = document.getElementById('admin-pass');
+    const userInfo = document.getElementById('user-info');
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const groupSelect = document.getElementById('group-select');
+    const createGroupBtn = document.getElementById('create-group-btn');
+
+    let currentUser = null;
+    let currentGroup = "general";
+    let isAdmin = false;
+
+    // Google login
+    loginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(result => {
+        currentUser = result.user;
+        userInfo.textContent = "Logged in as: " + currentUser.email;
+        if(adminPass.value === "ozentime1239") {
+          isAdmin = true;
+          userInfo.innerHTML += " <span class='admin'>(Admin)</span>";
+        }
+        loadMessages();
+      });
+    });
+
+    // Create new group
+    createGroupBtn.addEventListener('click', () => {
+      const newGroup = prompt("Enter new group name:");
+      if(newGroup) {
+        const option = document.createElement("option");
+        option.value = newGroup;
+        option.textContent = newGroup;
+        groupSelect.appendChild(option);
+        groupSelect.value = newGroup;
+        currentGroup = newGroup;
+        chatBox.innerHTML = "";
+        loadMessages();
+      }
+    });
+
+    // Send message
+    sendBtn.addEventListener('click', () => {
+      if(!currentUser) { alert("Login first!"); return; }
+      const msg = input.value.trim();
+      if(msg !== '') {
+        const now = new Date().toLocaleString();
+        db.ref("groups/"+currentGroup+"/messages").push({
+          text: msg,
+          sender: currentUser.email,
+          timestamp: now,
+          admin: isAdmin
+        });
+        input.value = '';
+      }
+    });
+
+    // Load messages
+    function loadMessages() {
+      db.ref("groups/"+currentGroup+"/messages").off();
+      db.ref("groups/"+currentGroup+"/messages").on("child_added", snapshot => {
+        const data = snapshot.val();
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        let sender = data.sender;
+        if(data.admin) sender = "<span class='admin'>"+sender+"</span>";
+        // Detect code snippet (``` ... ```)
+        if(data.text.startsWith("```") && data.text.endsWith("```")) {
+          const code = data.text.slice(3,-3);
+          messageDiv.innerHTML = `<strong>${sender}:</strong><pre><code class="language-javascript">${code}</code></pre>
+            <div class="timestamp">${data.timestamp}</div>`;
+          Prism.highlightAll();
+        } else {
+          messageDiv.innerHTML = `<strong>${sender}:</strong
