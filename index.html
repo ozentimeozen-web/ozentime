@@ -3,14 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Ozentime Connect</title>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
   <!-- Prism.js for syntax highlighting -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -36,6 +32,7 @@
     #chat-input { width:70%; padding:10px; margin-top:10px; border-radius:6px; border:1px solid #ccc; }
     #send-btn { padding:10px 15px; margin-left:10px; border:none; border-radius:6px; background:#00aaff; color:#fff; font-weight:bold; cursor:pointer; }
     #send-btn:hover { background:#0077cc; }
+    pre { background:#eef6ff; padding:15px; border-radius:8px; overflow-x:auto; }
   </style>
 </head>
 <body>
@@ -75,93 +72,27 @@
     <button id="send-btn">Send</button>
   </section>
 
+  <section>
+    <h2>main.java File</h2>
+    <div id="file-content">Loading...</div>
+  </section>
+
   <script>
-    // Firebase config (replace with your actual keys)
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-      projectId: "YOUR_PROJECT",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-    const loginBtn = document.getElementById('login-btn');
-    const adminPass = document.getElementById('admin-pass');
-    const userInfo = document.getElementById('user-info');
-    const chatBox = document.getElementById('chat-box');
-    const input = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-    const groupSelect = document.getElementById('group-select');
-    const createGroupBtn = document.getElementById('create-group-btn');
-
-    let currentUser = null;
-    let currentGroup = "general";
-    let isAdmin = false;
-
-    // Google login
-    loginBtn.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then(result => {
-        currentUser = result.user;
-        userInfo.textContent = "Logged in as: " + currentUser.email;
-        if(adminPass.value === "ozentime1239") {
-          isAdmin = true;
-          userInfo.innerHTML += " <span class='admin'>(Admin)</span>";
-        }
-        loadMessages();
-      });
-    });
-
-    // Create new group
-    createGroupBtn.addEventListener('click', () => {
-      const newGroup = prompt("Enter new group name:");
-      if(newGroup) {
-        const option = document.createElement("option");
-        option.value = newGroup;
-        option.textContent = newGroup;
-        groupSelect.appendChild(option);
-        groupSelect.value = newGroup;
-        currentGroup = newGroup;
-        chatBox.innerHTML = "";
-        loadMessages();
+    // Replace Firebase with direct file fetch
+    async function loadJavaFile() {
+      try {
+        const response = await fetch("main.java"); // root file
+        if (!response.ok) throw new Error("File not found");
+        const text = await response.text();
+        document.getElementById("file-content").innerHTML =
+          `<pre><code class="language-java">${text}</code></pre>`;
+        Prism.highlightAll();
+      } catch (err) {
+        document.getElementById("file-content").innerHTML =
+          "<p style='color:red'>Could not load main.java</p>";
       }
-    });
-
-    // Send message
-    sendBtn.addEventListener('click', () => {
-      if(!currentUser) { alert("Login first!"); return; }
-      const msg = input.value.trim();
-      if(msg !== '') {
-        const now = new Date().toLocaleString();
-        db.ref("groups/"+currentGroup+"/messages").push({
-          text: msg,
-          sender: currentUser.email,
-          timestamp: now,
-          admin: isAdmin
-        });
-        input.value = '';
-      }
-    });
-
-    // Load messages
-    function loadMessages() {
-      db.ref("groups/"+currentGroup+"/messages").off();
-      db.ref("groups/"+currentGroup+"/messages").on("child_added", snapshot => {
-        const data = snapshot.val();
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message';
-        let sender = data.sender;
-        if(data.admin) sender = "<span class='admin'>"+sender+"</span>";
-        // Detect code snippet (``` ... ```)
-        if(data.text.startsWith("```") && data.text.endsWith("```")) {
-          const code = data.text.slice(3,-3);
-          messageDiv.innerHTML = `<strong>${sender}:</strong><pre><code class="language-javascript">${code}</code></pre>
-            <div class="timestamp">${data.timestamp}</div>`;
-          Prism.highlightAll();
-        } else {
-          messageDiv.innerHTML = `<strong>${sender}:</strong
+    }
+    loadJavaFile();
+  </script>
+</body>
+</html>
