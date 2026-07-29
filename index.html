@@ -2,97 +2,182 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ozentime Connect</title>
+  <title>Ozentime Connect Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Prism.js for syntax highlighting -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0; padding: 0;
-      background: linear-gradient(135deg, #e6f7ff, #dbe6ff, #f9e6ff);
+      background: #f4f7fb;
       color: #333;
-      line-height: 1.6;
-      position: relative;
     }
-    .accent-left, .accent-right { position:absolute; top:0; width:400px; height:100%; z-index:-1; }
-    .accent-left { left:0; background:radial-gradient(circle at 30% 50%, #00aaff, #8844ff); clip-path:circle(60% at 0% 50%); }
-    .accent-right { right:0; background:radial-gradient(circle at 70% 50%, #8844ff, #ff66cc); clip-path:circle(60% at 100% 50%); }
-    .hero-circle { width:160px; height:160px; border-radius:50%; border:10px solid #00aaff; margin:30px auto; background:radial-gradient(circle,#e6f7ff 40%,transparent 70%); box-shadow:0 0 25px rgba(0,170,255,0.6); }
-    header { background:linear-gradient(135deg,#000,#004466); color:#fff; padding:30px 20px; text-align:center; border-bottom:4px solid #00aaff; }
-    nav { background:rgba(0,51,102,0.9); padding:12px; text-align:center; backdrop-filter:blur(6px); position:sticky; top:0; }
-    nav a { color:#fff; text-decoration:none; font-weight:bold; margin:0 15px; transition:color 0.3s ease; }
+    header {
+      background: linear-gradient(135deg,#000,#004466);
+      color:#fff; padding:20px; display:flex; align-items:center; justify-content:space-between;
+    }
+    header img { height:40px; }
+    nav {
+      background:#003366; color:#fff; padding:10px; display:flex; gap:15px;
+    }
+    nav a { color:#fff; text-decoration:none; font-weight:bold; }
     nav a:hover { color:#00aaff; }
-    section { padding:30px; margin:30px auto; max-width:900px; background:rgba(255,255,255,0.75); border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,0.15); backdrop-filter:blur(12px); }
-    #chat-box { border:1px solid #ccc; border-radius:8px; padding:15px; height:300px; overflow-y:auto; background:#fdfdfd; }
+    .container { padding:20px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+    .card {
+      background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+      padding:20px;
+    }
+    .card h3 { margin-top:0; }
+    .admin { color:#ff4444; font-weight:bold; }
+    table { width:100%; border-collapse:collapse; }
+    table th, table td { padding:8px; border-bottom:1px solid #ddd; text-align:left; }
+    #chat-box { border:1px solid #ccc; border-radius:8px; padding:15px; height:200px; overflow-y:auto; background:#fdfdfd; }
     .message { margin-bottom:12px; padding:8px; border-radius:6px; background:#eef6ff; }
     .timestamp { font-size:0.8em; color:#666; margin-top:4px; }
-    .admin { color:#ff4444; font-weight:bold; }
     #chat-input { width:70%; padding:10px; margin-top:10px; border-radius:6px; border:1px solid #ccc; }
     #send-btn { padding:10px 15px; margin-left:10px; border:none; border-radius:6px; background:#00aaff; color:#fff; font-weight:bold; cursor:pointer; }
     #send-btn:hover { background:#0077cc; }
     pre { background:#eef6ff; padding:15px; border-radius:8px; overflow-x:auto; }
+    @media(max-width:600px){ nav{flex-direction:column;} }
   </style>
 </head>
 <body>
-  <div class="accent-left"></div>
-  <div class="accent-right"></div>
-  <div class="hero-circle"></div>
-
   <header>
+    <img src="blue-logo.png" alt="Ozentime Logo"> <!-- Replace with your actual logo -->
     <h1>Ozentime Connect</h1>
-    <p>Collaborate • Share Code • Chat</p>
   </header>
-
   <nav>
-    <a href="index.html">Main Site</a>
-    <a href="connect.html">Connect</a>
-    <a href="about.html">About</a>
+    <a href="index.html">Dashboard</a>
+    <a href="users.html">Users</a>
+    <a href="analytics.html">Analytics</a>
+    <a href="reports.html">Reports</a>
+    <a href="settings.html">Settings</a>
+    <a href="logout.html" id="logout-btn">Logout</a>
   </nav>
 
-  <section>
-    <h2>Login</h2>
-    <p>Sign in with your Gmail to start collaborating.</p>
-    <button id="login-btn">Login with Gmail</button>
-    <input type="password" id="admin-pass" placeholder="Enter admin password">
-    <div id="user-info"></div>
-  </section>
+  <div class="container">
+    <div class="grid">
+      <div class="card">
+        <h3>Total Sales</h3>
+        <p>$65,024 <span style="color:green;">(+81%)</span></p>
+      </div>
+      <div class="card">
+        <h3>Site Visits</h3>
+        <p>24,981 <span style="color:red;">(-48%)</span></p>
+      </div>
+      <div class="card">
+        <h3>Searches</h3>
+        <p>14,147 <span style="color:green;">(+21%)</span></p>
+      </div>
+    </div>
 
-  <section>
-    <h2>Groups</h2>
-    <select id="group-select"><option value="general">General</option></select>
-    <button id="create-group-btn">Create Group</button>
-  </section>
+    <div class="grid">
+      <div class="card">
+        <h3>New Users</h3>
+        <ul>
+          <li>Jack (54 Min Ago)</li>
+          <li>Amir (3 Hours Ago)</li>
+          <li>Ember (6 Hours Ago)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Recent Orders</h3>
+        <table>
+          <tr><th>Course</th><th>Number</th><th>Payment</th><th>Status</th></tr>
+          <tr><td>JavaScript Tutorial</td><td>85743</td><td>Due</td><td>Pending</td></tr>
+          <tr><td>CSS Full Course</td><td>97245</td><td>Refunded</td><td>Declined</td></tr>
+          <tr><td>Flex-Box Tutorial</td><td>36452</td><td>Paid</td><td>Active</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Reminders</h3>
+        <p>Workshop: 08:00 AM - 12:00 PM</p>
+        <button>Add Reminder</button>
+      </div>
+    </div>
 
-  <section>
-    <h2>Chat Room</h2>
-    <div id="chat-box"></div>
-    <input type="text" id="chat-input" placeholder="Type a message...">
-    <button id="send-btn">Send</button>
-  </section>
+    <div class="card">
+      <h3>Chat Room</h3>
+      <div id="chat-box"></div>
+      <input type="text" id="chat-input" placeholder="Type a message...">
+      <button id="send-btn">Send</button>
+    </div>
 
-  <section>
-    <h2>main.java File</h2>
-    <div id="file-content">Loading...</div>
-  </section>
+    <div class="card">
+      <h3>main.js File</h3>
+      <div id="file-content">Loading...</div>
+    </div>
+  </div>
 
   <script>
-    // Replace Firebase with direct file fetch
-    async function loadJavaFile() {
+    // LOGIN SYSTEM
+    window.onload = () => {
+      const savedRole = localStorage.getItem("userRole");
+      if (!savedRole) {
+        const code = prompt("Enter member/admin code:");
+        if (code === "3012") {
+          localStorage.setItem("userRole", "member");
+          alert("Logged in as Member");
+        } else if (code === "ozentime1239") {
+          localStorage.setItem("userRole", "admin");
+          alert("Logged in as Admin");
+        } else {
+          alert("Invalid code!");
+          window.location.reload();
+        }
+      }
+    };
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("userRole");
+      alert("Logged out!");
+      window.location.href = "login.html";
+    });
+
+    // CHAT SYSTEM (LocalStorage)
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    let currentGroup = "general";
+
+    sendBtn.addEventListener('click', () => {
+      const msg = input.value.trim();
+      if(msg !== '') {
+        const now = new Date().toLocaleString();
+        const stored = JSON.parse(localStorage.getItem(currentGroup)) || [];
+        stored.push({ text: msg, sender: localStorage.getItem("userRole"), timestamp: now });
+        localStorage.setItem(currentGroup, JSON.stringify(stored));
+        input.value = '';
+        showMessage(stored[stored.length - 1]);
+      }
+    });
+
+    function showMessage(data) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      let sender = data.sender;
+      if (sender === "admin") sender = "<span class='admin'>Admin</span>";
+      messageDiv.innerHTML = `<strong>${sender}:</strong> ${data.text}
+        <div class="timestamp">${data.timestamp}</div>`;
+      chatBox.appendChild(messageDiv);
+    }
+
+    function loadMessages() {
+      chatBox.innerHTML = "";
+      const stored = JSON.parse(localStorage.getItem(currentGroup)) || [];
+      stored.forEach(showMessage);
+    }
+    loadMessages();
+
+    // FILE VIEWER
+    async function loadJSFile() {
       try {
-        const response = await fetch("main.java"); // root file
+        const response = await fetch("main.js");
         if (!response.ok) throw new Error("File not found");
         const text = await response.text();
         document.getElementById("file-content").innerHTML =
-          `<pre><code class="language-java">${text}</code></pre>`;
-        Prism.highlightAll();
-      } catch (err) {
-        document.getElementById("file-content").innerHTML =
-          "<p style='color:red'>Could not load main.java</p>";
-      }
-    }
-    loadJavaFile();
-  </script>
-</body>
-</html>
+          `<pre><code class="language-javascript">${text}</code
